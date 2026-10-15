@@ -1,0 +1,73 @@
+{% extends '@admin/layout.twig' %}
+
+{# The form of an entry. Receives "item" (id, extension_id, position) or
+   null, "texts" (locale => {question, answer}, as typed after a failed
+   validation), "errors", "locales" and "extensions" (id => name). #}
+{% block title %}{{ trans('faq.admin.title') }} – {{ site_name }}{% endblock %}
+
+{% block admin %}
+{% include '@admin/_page_header.twig' with {
+    heading: item ? trans('faq.admin.edit') : trans('faq.admin.new'),
+    crumbs: [{label: trans('faq.admin.title'), path: '/admin/faq'}]
+} only %}
+
+{% for error in errors %}
+    <p class="flash flash-error" role="alert">{{ trans(error) }}</p>
+{% endfor %}
+
+<form method="post" action="{{ url(item ? '/admin/faq/' ~ item.id : '/admin/faq/new') }}">
+    {{ csrf_field() }}
+
+    <fieldset class="card-box">
+        <legend>{{ trans('faq.admin.assignment') }}</legend>
+        <div class="field-grid">
+            <div class="field">
+                <label for="extension_id">{{ trans('faq.admin.field.extension') }}</label>
+                <select id="extension_id" name="extension_id">
+                    <option value="" {{ (item.extension_id ?? null) is null ? 'selected' }}>{{ trans('faq.admin.general') }}</option>
+                    {% for id, name in extensions %}
+                        <option value="{{ id }}" {{ (item.extension_id ?? null) == id ? 'selected' }}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <small>{{ trans('faq.admin.field.extension_hint') }}</small>
+            </div>
+            <div class="field">
+                <label for="position">{{ trans('faq.admin.field.position') }}</label>
+                <input id="position" name="position" type="number" min="0" max="9999" step="1" value="{{ item.position ?? 0 }}">
+                <small>{{ trans('faq.admin.field.position_hint') }}</small>
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="columns">
+        {% for code in locales %}
+            {% set text = texts[code] ?? {} %}
+            <fieldset class="card-box">
+                <legend>{{ locale_name(code) }}</legend>
+                <div class="field">
+                    <label for="question_{{ code }}">{{ trans('faq.admin.field.question') }}</label>
+                    <input id="question_{{ code }}" name="texts[{{ code }}][question]" value="{{ text.question ?? '' }}" maxlength="300" lang="{{ code }}">
+                </div>
+                <div class="field">
+                    <label for="answer_{{ code }}">{{ trans('faq.admin.field.answer') }}</label>
+                    <textarea id="answer_{{ code }}" name="texts[{{ code }}][answer]" rows="6" lang="{{ code }}">{{ text.answer ?? '' }}</textarea>
+                </div>
+            </fieldset>
+        {% endfor %}
+    </div>
+
+    <div class="card-box">
+        <button type="submit">{{ trans('faq.admin.save') }}</button>
+    </div>
+</form>
+
+{% if item %}
+    <section class="card-box">
+        <form method="post" action="{{ url('/admin/faq/' ~ item.id ~ '/delete') }}" class="danger-form">
+            {{ csrf_field() }}
+            <p><small>{{ trans('faq.admin.delete_hint') }}</small></p>
+            <button type="submit" class="danger">{{ trans('faq.admin.delete') }}</button>
+        </form>
+    </section>
+{% endif %}
+{% endblock %}

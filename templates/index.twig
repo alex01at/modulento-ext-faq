@@ -1,0 +1,26 @@
+{% extends 'layout/base.twig' %}
+
+{% block title %}{{ trans('faq.title') }} – {{ site_name }}{% endblock %}
+
+{% block content %}
+<h1>{{ trans('faq.title') }}</h1>
+
+<form method="get" action="{{ url('/faq') }}" class="stack-form" role="search">
+    <label for="q">{{ trans('faq.search') }}</label>
+    <input id="q" name="q" type="search" value="{{ search }}">
+    <button type="submit">{{ trans('faq.search_submit') }}</button>
+</form>
+
+{% if items is empty %}
+    <p class="empty">{{ search ? trans('faq.none_found') : trans('faq.none') }}</p>
+{% else %}
+    <div class="faq-list">
+        {% for item in items %}
+            <details class="faq-item">
+                <summary>{{ item.question }}</summary>
+                <div>{{ item.answer|raw }}</div>
+            </details>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

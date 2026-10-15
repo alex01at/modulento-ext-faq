@@ -1,0 +1,49 @@
+{% extends '@admin/layout.twig' %}
+{% import '@admin/_icons.twig' as icons %}
+
+{# Every entry. Receives "items" (id, extension_id, question), "page", "pages", "filter" and "extensions" (id => name). #}
+{% block title %}{{ trans('faq.admin.title') }} – {{ site_name }}{% endblock %}
+
+{% block admin %}
+{% include '@admin/_page_header.twig' with {heading: trans('faq.admin.title')} only %}
+
+<section class="card-box">
+    <div class="card-head">
+        <form method="get" action="{{ url('/admin/faq') }}" class="inline-add">
+            <label for="extension">{{ trans('faq.admin.filter') }}</label>
+            <select id="extension" name="extension" onchange="this.form.submit()">
+                <option value="all" {{ filter == 'all' ? 'selected' }}>{{ trans('faq.admin.filter_all') }}</option>
+                <option value="" {{ filter == '' ? 'selected' }}>{{ trans('faq.admin.general') }}</option>
+                {% for id, name in extensions %}
+                    <option value="{{ id }}" {{ filter == id ? 'selected' }}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <a class="btn" href="{{ url('/admin/faq/new') }}">{{ icons.icon('plus') }}<span>{{ trans('faq.admin.new') }}</span></a>
+    </div>
+
+    {% if items is empty %}
+        <p class="empty">{{ trans('faq.admin.none') }}</p>
+    {% else %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                <tr>
+                    <th scope="col">{{ trans('faq.admin.field.question') }}</th>
+                    <th scope="col">{{ trans('faq.admin.field.extension') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in items %}
+                    <tr>
+                        <th scope="row"><a href="{{ url('/admin/faq/' ~ item.id) }}">{{ item.question }}</a></th>
+                        <td>{{ item.extension_id ? (extensions[item.extension_id] ?? item.extension_id) : trans('faq.admin.general') }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% include '@admin/_pager.twig' with {path: '/admin/faq', page: page, pages: pages, extra: '&extension=' ~ filter} only %}
+    {% endif %}
+</section>
+{% endblock %}
