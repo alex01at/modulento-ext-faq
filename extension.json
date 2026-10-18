@@ -1,8 +1,9 @@
 {
     "id": "faq",
     "name": "FAQ",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "api": 1,
     "type": "addon",
+    "description": "Adds a frequently-asked-questions page, managed in the administration.",
     "namespace": "Modulento\\Faq"
 }
